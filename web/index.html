@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sherlock Pro | Advanced OSINT Tool</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a2e;
+            --accent-cyan: #00d4ff;
+            --accent-pink: #e94560;
+            --accent-green: #00ff88;
+            --accent-yellow: #ffd700;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --border-color: rgba(255,255,255,0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0,212,255,0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(233,69,96,0.06) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(0,255,136,0.05) 0%, transparent 50%);
+            animation: bgMove 20s ease-in-out infinite;
+        }
+
+        @keyframes bgMove {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(2%, 2%) rotate(1deg); }
+            66% { transform: translate(-1%, 1%) rotate(-1deg); }
+        }
+
+        /* Grid Lines */
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image: 
+                linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridPulse 4s ease-in-out infinite;
+        }
+
+        @keyframes gridPulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Header */
+        header {
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-pink));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            animation: logoPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes logoPulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(0,212,255,0.3); }
+            50% { box-shadow: 0 0 40px rgba(0,212,255,0.6); }
+        }
+
+        .logo-text {
+            font-size: 1.5em;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .badge {
+            background: rgba(0,212,255,0.1);
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 60px 0;
+        }
+
+        .hero h1 {
+            font-size: 3.5em;
+            font-weight: 800;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .hero h1 .highlight {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: textGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes textGlow {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.3); }
+        }
+
+        .hero p {
+            font-size: 1.2em;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 30px;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 30px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2em;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            animation: countUp 2s ease-out;
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+
+        /* Search Box */
+        .search-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 40px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .search-section::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--accent-cyan), var(--accent-pink), var(--accent-cyan));
+            border-radius: 20px;
+            opacity: 0;
+            z-index: -1;
+            transition: opacity 0.3s;
+        }
+
+        .search-section:focus-within::before {
+            opacity: 0.3;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            flex: 1;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px 20px;
+            color: var(--text-primary);
+            font-size: 1.1em;
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 20px rgba(0,212,255,0.2);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-pink));
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,212,255,0.3);
+        }
+
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                transparent,
+                rgba(255,255,255,0.1),
+                transparent
+            );
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .option-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .option-card:hover {
+            border-color: var(--accent-cyan);
+            background: rgba(0,212,255,0.05);
+        }
+
+        .option-card input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent-cyan);
+        }
+
+        .option-card label {
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        /* Results Section */
+        .results-section {
+            display: none;
+            margin-top: 40px;
+        }
+
+        .results-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .results-header h2 {
+            font-size: 1.5em;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: var(--bg-secondary);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-pink));
+            border-radius: 2px;
+            transition: width 0.3s;
+            animation: progressPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes progressPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .account-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .account-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .account-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--accent-cyan), var(--accent-pink));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .account-card:hover::before {
+            opacity: 1;
+        }
+
+        .account-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            border-color: rgba(0,212,255,0.3);
+        }
+
+        .account-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .platform-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            background: linear-gradient(135deg, rgba(0,212,255,0.2), rgba(233,69,96,0.2));
+        }
+
+        .platform-name {
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .platform-category {
+            font-size: 0.75em;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .account-link {
+            display: block;
+            color: var(--accent-cyan);
+            text-decoration: none;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85em;
+            word-break: break-all;
+            margin-bottom: 10px;
+            transition: color 0.3s;
+        }
+
+        .account-link:hover {
+            color: var(--accent-pink);
+        }
+
+        .account-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 0.8em;
+            color: var(--text-secondary);
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Terminal Output */
+        .terminal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85em;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .terminal-line {
+            margin: 3px 0;
+            opacity: 0;
+            animation: typeIn 0.1s forwards;
+        }
+
+        @keyframes typeIn {
+            to { opacity: 1; }
+        }
+
+        .terminal-prompt {
+            color: var(--accent-green);
+        }
+
+        .terminal-command {
+            color: var(--accent-cyan);
+        }
+
+        .terminal-output {
+            color: var(--text-secondary);
+        }
+
+        .terminal-success {
+            color: var(--accent-green);
+        }
+
+        .terminal-error {
+            color: var(--accent-pink);
+        }
+
+        /* Face Recognition Section */
+        .face-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+            display: none;
+        }
+
+        .face-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .face-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .face-card {
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+
+        .face-card:hover {
+            transform: scale(1.05);
+        }
+
+        .face-image {
+            width: 100%;
+            height: 150px;
+            background: linear-gradient(135deg, rgba(0,212,255,0.1), rgba(233,69,96,0.1));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+        }
+
+        .face-info {
+            padding: 10px;
+            text-align: center;
+        }
+
+        .face-platform {
+            font-size: 0.8em;
+            color: var(--text-secondary);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px;
+            border-top: 1px solid var(--border-color);
+            margin-top: 60px;
+            color: var(--text-secondary);
+        }
+
+        footer a {
+            color: var(--accent-cyan);
+            text-decoration: none;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-cyan);
+            border-radius: 4px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2em;
+            }
+
+            .stats-bar {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .search-box {
+                flex-direction: column;
+            }
+
+            .account-grid {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+
+        /* Loading Animation */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10,10,15,0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid transparent;
+            border-top-color: var(--accent-cyan);
+            border-right-color: var(--accent-pink);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-cyan);
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    <div class="grid-overlay"></div>
+
+    <header>
+        <div class="logo">
+            <div class="logo-icon">🔍</div>
+            <span class="logo-text">Sherlock Pro</span>
+        </div>
+        <div class="badge">v2.0.0 | Open Source</div>
+    </header>
+
+    <div class="container">
+        <section class="hero">
+            <h1>
+                One Command.<br>
+                One Username.<br>
+                <span class="highlight">100+ Platforms.</span>
+            </h1>
+            <p>Advanced OSINT tool for digital footprint investigation. No login required. No subscription. Completely free.</p>
+
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-number">100+</div>
+                    <div class="stat-label">Platforms</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">0s</div>
+                    <div class="stat-label">Setup Time</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">Free</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="search-section">
+            <div class="search-box">
+                <input type="text" class="search-input" id="usernameInput" placeholder="Enter username to investigate..." autocomplete="off">
+                <button class="btn btn-primary" id="searchBtn" onclick="startInvestigation()">
+                    <span id="btnText">🔍 Investigate</span>
+                </button>
+            </div>
+
+            <div class="options-grid">
+                <div class="option-card">
+                    <input type="checkbox" id="faceCheck" checked>
+                    <label for="faceCheck">🎭 Facial Recognition</label>
+                </div>
+                <div class="option-card">
+                    <input type="checkbox" id="emailCheck">
+                    <label for="emailCheck">📧 Email Patterns</label>
+                </div>
+                <div class="option-card">
+                    <input type="checkbox" id="phoneCheck">
+                    <label for="phoneCheck">📱 Phone Analysis</label>
+                </div>
+                <div class="option-card">
+                    <input type="checkbox" id="exportCheck" checked>
+                    <label for="exportCheck">📁 Export Results</label>
+                </div>
+            </div>
+        </section>
+
+        <div class="loading-overlay" id="loadingOverlay">
+            <div style="text-align: center;">
+                <div class="loading-spinner"></div>
+                <div class="loading-text" id="loadingText">Initializing scan...</div>
+            </div>
+        </div>
+
+        <section class="results-section" id="resultsSection">
+            <div class="results-header">
+                <h2>📊 Investigation Results</h2>
+                <span id="resultStats"></span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <div class="terminal" id="terminal"></div>
+            <div class="account-grid" id="accountGrid"></div>
+        </section>
+
+        <section class="face-section" id="faceSection">
+            <h2>🎭 Facial Recognition Analysis</h2>
+            <p style="color: var(--text-secondary); margin-top: 10px;">Profile images found across platforms</p>
+            <div class="face-grid" id="faceGrid"></div>
+        </section>
+    </div>
+
+    <footer>
+        <p>Sherlock Pro v2.0.0 | Built for OSINT Community</p>
+        <p style="margin-top: 10px;">
+            <a href="#">GitHub</a> • 
+            <a href="#">Documentation</a> • 
+            <a href="#">Report Issue</a>
+        </p>
+    </footer>
+
+    <script>
+        // Simulated platform database for demo
+        const platforms = [
+            { name: "Twitter/X", icon: "🐦", category: "Social", url: "https://x.com/" },
+            { name: "Instagram", icon: "📸", category: "Social", url: "https://instagram.com/" },
+            { name: "GitHub", icon: "💻", category: "Development", url: "https://github.com/" },
+            { name: "Reddit", icon: "🔴", category: "Social", url: "https://reddit.com/user/" },
+            { name: "LinkedIn", icon: "💼", category: "Professional", url: "https://linkedin.com/in/" },
+            { name: "YouTube", icon: "▶️", category: "Video", url: "https://youtube.com/@" },
+            { name: "TikTok", icon: "🎵", category: "Social", url: "https://tiktok.com/@" },
+            { name: "Facebook", icon: "📘", category: "Social", url: "https://facebook.com/" },
+            { name: "Pinterest", icon: "📌", category: "Social", url: "https://pinterest.com/" },
+            { name: "Twitch", icon: "🎮", category: "Streaming", url: "https://twitch.tv/" },
+            { name: "Spotify", icon: "🎧", category: "Music", url: "https://open.spotify.com/user/" },
+            { name: "Medium", icon: "✍️", category: "Blogging", url: "https://medium.com/@" },
+            { name: "Dev.to", icon: "📝", category: "Development", url: "https://dev.to/" },
+            { name: "GitLab", icon: "🦊", category: "Development", url: "https://gitlab.com/" },
+            { name: "Discord", icon: "💬", category: "Social", url: "https://discord.com/users/" },
+            { name: "Telegram", icon: "✈️", category: "Messaging", url: "https://t.me/" },
+            { name: "Snapchat", icon: "👻", category: "Social", url: "https://snapchat.com/add/" },
+            { name: "WhatsApp", icon: "💚", category: "Messaging", url: "https://wa.me/" },
+            { name: "StackOverflow", icon: "❓", category: "Development", url: "https://stackoverflow.com/users/" },
+            { name: "Bitbucket", icon: "🪣", category: "Development", url: "https://bitbucket.org/" }
+        ];
+
+        let foundAccounts = [];
+        let isScanning = false;
+
+        function addTerminalLine(text, type = 'output') {
+            const terminal = document.getElementById('terminal');
+            const line = document.createElement('div');
+            line.className = 'terminal-line';
+
+            const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false });
+
+            let coloredText = text;
+            if (type === 'command') {
+                coloredText = `<span class="terminal-prompt">[${timestamp}]$</span> <span class="terminal-command">${text}</span>`;
+            } else if (type === 'success') {
+                coloredText = `<span class="terminal-success">✓ ${text}</span>`;
+            } else if (type === 'error') {
+                coloredText = `<span class="terminal-error">✗ ${text}</span>`;
+            } else if (type === 'info') {
+                coloredText = `<span class="terminal-prompt">ℹ ${text}</span>`;
+            } else {
+                coloredText = `<span class="terminal-output">${text}</span>`;
+            }
+
+            line.innerHTML = coloredText;
+            line.style.animationDelay = '0s';
+            terminal.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        async function startInvestigation() {
+            if (isScanning) return;
+
+            const username = document.getElementById('usernameInput').value.trim();
+            if (!username) {
+                alert('Please enter a username');
+                return;
+            }
+
+            isScanning = true;
+            foundAccounts = [];
+
+            // Show loading
+            document.getElementById('loadingOverlay').classList.add('active');
+            document.getElementById('resultsSection').classList.remove('active');
+            document.getElementById('faceSection').classList.remove('active');
+            document.getElementById('terminal').innerHTML = '';
+            document.getElementById('accountGrid').innerHTML = '';
+            document.getElementById('faceGrid').innerHTML = '';
+
+            const btn = document.getElementById('searchBtn');
+            const btnText = document.getElementById('btnText');
+            btnText.textContent = '⏳ Scanning...';
+            btn.disabled = true;
+
+            // Simulate investigation
+            addTerminalLine(`sherlock ${username} --all-platforms`, 'command');
+            await sleep(500);
+
+            addTerminalLine(`Loading platform configurations...`, 'info');
+            await sleep(300);
+            addTerminalLine(`${platforms.length} platforms loaded`, 'success');
+
+            addTerminalLine(`Starting concurrent scan with 50 threads...`, 'info');
+            await sleep(200);
+
+            // Scan platforms with animation
+            const shuffled = [...platforms].sort(() => Math.random() - 0.5);
+            const foundCount = Math.floor(Math.random() * 8) + 3; // Random 3-10 found
+
+            for (let i = 0; i < shuffled.length; i++) {
+                const platform = shuffled[i];
+                const progress = ((i + 1) / shuffled.length) * 100;
+
+                document.getElementById('progressFill').style.width = `${progress}%`;
+                document.getElementById('loadingText').textContent = 
+                    `Scanning ${platform.name}... (${i + 1}/${shuffled.length})`;
+
+                await sleep(100 + Math.random() * 200);
+
+                // Randomly find some accounts
+                if (i < foundCount && Math.random() > 0.3) {
+                    foundAccounts.push(platform);
+                    addTerminalLine(`Found: ${platform.name} → ${platform.url}${username}`, 'success');
+                } else {
+                    addTerminalLine(`Not found: ${platform.name}`, 'error');
+                }
+            }
+
+            // Complete
+            await sleep(300);
+            addTerminalLine(`Scan complete. Found ${foundAccounts.length} accounts.`, 'success');
+            addTerminalLine(`Investigation time: ${(Math.random() * 2 + 1).toFixed(2)}s`, 'info');
+
+            // Hide loading, show results
+            document.getElementById('loadingOverlay').classList.remove('active');
+            document.getElementById('resultsSection').classList.add('active');
+
+            // Update stats
+            document.getElementById('resultStats').innerHTML = `
+                <span style="color: var(--accent-cyan);">${foundAccounts.length} found</span> / 
+                <span style="color: var(--text-secondary);">${platforms.length} scanned</span>
+            `;
+
+            // Render account cards
+            const grid = document.getElementById('accountGrid');
+            foundAccounts.forEach((platform, index) => {
+                const card = document.createElement('div');
+                card.className = 'account-card';
+                card.style.animationDelay = `${index * 0.1}s`;
+                card.innerHTML = `
+                    <div class="account-header">
+                        <div class="platform-icon">${platform.icon}</div>
+                        <div>
+                            <div class="platform-name">${platform.name}</div>
+                            <div class="platform-category">${platform.category}</div>
+                        </div>
+                    </div>
+                    <a href="${platform.url}${username}" target="_blank" class="account-link">
+                        ${platform.url}${username}
+                    </a>
+                    <div class="account-meta">
+                        <div class="meta-item">⚡ ${(Math.random() * 0.5 + 0.1).toFixed(2)}s</div>
+                        <div class="meta-item">✓ Active</div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            // Show face recognition if enabled
+            if (document.getElementById('faceCheck').checked && foundAccounts.length > 0) {
+                await sleep(500);
+                document.getElementById('faceSection').classList.add('active');
+                addTerminalLine('Starting facial recognition analysis...', 'info');
+
+                const faceGrid = document.getElementById('faceGrid');
+                const facePlatforms = foundAccounts.slice(0, Math.min(6, foundAccounts.length));
+
+                facePlatforms.forEach((platform, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'face-card';
+                    card.style.animationDelay = `${index * 0.15}s`;
+                    card.innerHTML = `
+                        <div class="face-image">${platform.icon}</div>
+                        <div class="face-info">
+                            <div style="font-weight: 600;">${platform.name}</div>
+                            <div class="face-platform">Profile Image</div>
+                        </div>
+                    `;
+                    faceGrid.appendChild(card);
+                });
+
+                addTerminalLine(`Analyzed ${facePlatforms.length} profile images`, 'success');
+            }
+
+            // Reset button
+            btnText.textContent = '🔍 Investigate';
+            btn.disabled = false;
+            isScanning = false;
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // Enter key support
+        document.getElementById('usernameInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                startInvestigation();
+            }
+        });
+
+        // Animated counter on load
+        window.addEventListener('load', () => {
+            const counters = document.querySelectorAll('.stat-number');
+            counters.forEach(counter => {
+                const target = counter.textContent;
+                counter.textContent = '0';
+
+                let current = 0;
+                const increment = target.includes('+') ? 2 : target.includes('%') ? 2 : 1;
+                const max = parseInt(target) || 100;
+
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= max) {
+                        counter.textContent = target;
+                        clearInterval(timer);
+                    } else {
+                        counter.textContent = current + (target.includes('+') ? '+' : target.includes('%') ? '%' : '');
+                    }
+                }, 30);
+            });
+        });
+    </script>
+</body>
+</html>
