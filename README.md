@@ -8,7 +8,7 @@
 
 ## 🌐 Live Web Demo
 
-**[Try the Web UI →](https://yourusername.github.io/sherlock-pro/)**
+**[Try the Web UI →](https://sarukesh-crater.github.io/sherlock-pro/)**
 
 The web interface runs entirely in your browser with animated effects, terminal simulation, and real-time scanning visualization.
 
